@@ -19,6 +19,8 @@ const BOOSTS_URL = "https://api.dexscreener.com/token-boosts/top/v1";
 const TOKENS_URL = "https://api.dexscreener.com/latest/dex/tokens/";
 const MAX_ADDR_PER_CALL = 30;
 const CACHE_SECONDS = 60;
+// Don't show micro-cap dust: skip any token whose market cap is below this.
+const MIN_MARKET_CAP = 30_000;
 
 // ----- Minimal shapes of the DexScreener payloads we consume -----
 interface BoostItem {
@@ -28,6 +30,8 @@ interface BoostItem {
 
 interface DexPair {
   chainId?: string;
+  pairAddress?: string;
+  url?: string;
   baseToken?: { address?: string; name?: string; symbol?: string };
   priceUsd?: string;
   marketCap?: number;
@@ -40,6 +44,9 @@ interface DexPair {
 
 interface OutToken {
   tokenAddress: string;
+  pairAddress: string | null;
+  chainId: string;
+  dexUrl: string;
   name: string;
   symbol: string;
   imageUrl: string;
@@ -153,9 +160,19 @@ async function buildDeck(): Promise<OutToken[]> {
     if (!imageUrl) continue;
     if (marketCap === undefined || marketCap === null) continue;
     if (!name || !symbol) continue;
+    // Skip micro-caps below the floor.
+    if (marketCap < MIN_MARKET_CAP) continue;
+
+    const pairAddress = pair.pairAddress ?? null;
+    const dexUrl =
+      pair.url ??
+      (pairAddress ? `https://dexscreener.com/solana/${pairAddress}` : `https://dexscreener.com/solana/${addr}`);
 
     out.push({
       tokenAddress: addr,
+      pairAddress,
+      chainId: "solana",
+      dexUrl,
       name,
       symbol,
       imageUrl,

@@ -1,21 +1,30 @@
-/* SwipeFi — dark, mobile-first, playful. CSS transforms/transitions only. */
+/* memeder — bright blue & white, playful meme theme.
+   CSS transforms/transitions only, mobile-first. */
 
 :root {
-  --bg: #0c0d12;
-  --bg-elev: #15171f;
-  --bg-card: #1b1e29;
-  --bg-card-2: #20232f;
-  --border: #2a2e3c;
-  --text: #f2f3f7;
-  --text-dim: #9aa0b4;
-  --text-faint: #6b7186;
-  --bull: #1ed760;
-  --bull-dim: #11371f;
-  --bear: #ff4d57;
-  --bear-dim: #3a151a;
-  --accent: #7c5cff;
-  --radius: 18px;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --bg: #e8f0ff;
+  --bg-2: #ffffff;
+  --bg-elev: #f4f8ff;
+  --bg-card: #ffffff;
+  --border: #d4e1fb;
+  --border-strong: #b9cdf6;
+  --text: #0b1b3a;
+  --text-dim: #5a6b8c;
+  --text-faint: #93a1bf;
+
+  --brand: #2f6bff;
+  --brand-2: #1e4fd6;
+  --brand-soft: #e4edff;
+
+  --bull: #16c784;
+  --bull-soft: #e2f8ef;
+  --bear: #ef3a4b;
+  --bear-soft: #fde4e6;
+
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow: 0 16px 40px rgba(31, 79, 214, 0.16);
+  --shadow-sm: 0 6px 18px rgba(31, 79, 214, 0.12);
 }
 
 * {
@@ -32,10 +41,11 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 50% -10%, #1a1430 0%, transparent 60%),
-    var(--bg);
+    radial-gradient(1000px 520px at 50% -8%, #cfe0ff 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, #f5f9ff 100%);
+  background-attachment: fixed;
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica,
     Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
@@ -47,7 +57,7 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+  padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom);
 }
 
 /* ---------- Header ---------- */
@@ -62,15 +72,16 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: -0.03em;
 }
 .brand-mark {
-  font-size: 22px;
+  font-size: 26px;
+  filter: drop-shadow(0 3px 6px rgba(47, 107, 255, 0.35));
 }
 .brand-name {
-  background: linear-gradient(90deg, #fff, #b9acff);
+  background: linear-gradient(90deg, var(--brand) 0%, #6f9bff 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -79,25 +90,30 @@ body {
 .tabs {
   display: flex;
   gap: 4px;
-  background: var(--bg-elev);
+  background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px;
+  box-shadow: var(--shadow-sm);
 }
 .tab {
   border: none;
   background: transparent;
   color: var(--text-dim);
   font-size: 13px;
-  font-weight: 700;
-  padding: 7px 14px;
+  font-weight: 800;
+  padding: 8px 16px;
   border-radius: 999px;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, transform 0.1s;
 }
 .tab.active {
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+  box-shadow: 0 4px 12px rgba(47, 107, 255, 0.4);
+}
+.tab:active {
+  transform: scale(0.96);
 }
 
 /* ---------- Layout ---------- */
@@ -105,62 +121,73 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 .view {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 /* ---------- Deck ---------- */
 .deck-wrap {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 12px 0;
+  padding: 10px 0;
   min-height: 0;
 }
 .deck {
   position: relative;
   width: 100%;
-  max-width: 360px;
-  aspect-ratio: 3 / 4;
+  max-width: 380px;
+  height: min(72dvh, 600px);
+  margin: 0 auto;
 }
 
 .card {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-2) 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 22px 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 12px;
   touch-action: none;
   user-select: none;
   will-change: transform;
   cursor: grab;
+  overflow: hidden;
 }
 .card.dragging {
   cursor: grabbing;
 }
 .card--behind {
-  transform: scale(0.94) translateY(14px);
-  filter: brightness(0.8);
+  transform: scale(0.94) translateY(16px);
+  filter: saturate(0.85) brightness(0.99);
   pointer-events: none;
+  box-shadow: var(--shadow-sm);
 }
 
+/* card head: logo + name + price */
+.card-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
 .card-logo-wrap {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  margin-top: 8px;
   flex-shrink: 0;
 }
 .card-logo {
@@ -169,37 +196,40 @@ body {
   object-fit: cover;
   pointer-events: none;
 }
-
 .card-title {
-  margin-top: 16px;
-  text-align: center;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 .card-name {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 19px;
+  font-weight: 900;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card-ticker {
-  font-size: 14px;
-  color: var(--text-dim);
-  font-weight: 700;
-}
-
-.card-price {
-  margin-top: 14px;
-  font-size: 26px;
+  font-size: 13px;
+  color: var(--brand);
   font-weight: 800;
+}
+.card-pricewrap {
+  text-align: right;
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  flex-direction: column;
+  gap: 1px;
+}
+.card-price {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
 }
 .card-change {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
 }
 .card-change.up {
   color: var(--bull);
@@ -208,46 +238,97 @@ body {
   color: var(--bear);
 }
 
-.card-stats {
-  margin-top: auto;
+/* chart */
+.card-chart-wrap {
+  flex: 1;
+  min-height: 150px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0c0d12;
+}
+.card-chart {
   width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  /* The chart is a visual inside a draggable card — let pointer events pass
+     through so swiping works anywhere. Use the button for interaction. */
+  pointer-events: none;
+}
+.card-chart--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  color: #4b5366;
+}
+
+/* stats */
+.card-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding-top: 18px;
 }
 .stat {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--brand-soft);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px 8px;
+  padding: 9px 6px;
   text-align: center;
 }
 .stat-label {
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-faint);
-  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 800;
 }
 .stat-value {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 900;
+  color: var(--text);
+}
+
+/* dexscreener link button on the card */
+.card-dexlink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--brand-2);
+  background: var(--bg-elev);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 11px;
+  transition: background 0.12s, transform 0.1s, border-color 0.12s;
+}
+.card-dexlink:hover {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+.card-dexlink:active {
+  transform: scale(0.98);
 }
 
 /* ---------- Stamps ---------- */
 .stamp {
   position: absolute;
-  top: 24px;
-  font-size: 28px;
+  top: 64px;
+  z-index: 5;
+  font-size: 26px;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   padding: 6px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 4px solid;
+  background: rgba(255, 255, 255, 0.85);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.05s linear;
@@ -256,58 +337,61 @@ body {
   right: 18px;
   color: var(--bull);
   border-color: var(--bull);
-  transform: rotate(14deg);
+  transform: rotate(13deg);
 }
 .stamp-bear {
   left: 18px;
   color: var(--bear);
   border-color: var(--bear);
-  transform: rotate(-14deg);
+  transform: rotate(-13deg);
 }
 
 /* ---------- Action buttons ---------- */
 .deck-actions {
   display: flex;
   justify-content: center;
-  gap: 28px;
-  padding: 8px 0 4px;
+  gap: 30px;
+  padding: 10px 0 4px;
 }
 .action-btn {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--bg-elev);
+  border: 2px solid var(--border-strong);
+  background: var(--bg-2);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.12s, border-color 0.12s, background 0.12s;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.12s, border-color 0.12s, background 0.12s,
+    box-shadow 0.12s;
 }
 .action-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.88);
 }
 .action-btn--bear {
   color: var(--bear);
 }
 .action-btn--bear:hover {
   border-color: var(--bear);
-  background: var(--bear-dim);
+  background: var(--bear-soft);
 }
 .action-btn--bull {
   color: var(--bull);
 }
 .action-btn--bull:hover {
   border-color: var(--bull);
-  background: var(--bull-dim);
+  background: var(--bull-soft);
 }
 
 .hint {
   text-align: center;
   color: var(--text-faint);
   font-size: 12px;
+  font-weight: 600;
   margin: 6px 0 14px;
 }
 
@@ -323,24 +407,27 @@ body {
   text-align: center;
   padding: 24px;
   background: var(--bg-card);
-  border: 1px dashed var(--border);
+  border: 2px dashed var(--border-strong);
   border-radius: var(--radius);
+  font-weight: 700;
 }
 .deck-msg-detail {
   color: var(--text-faint);
   font-size: 12px;
+  font-weight: 600;
   max-width: 240px;
 }
 .primary-btn,
 .retry-btn {
-  background: var(--accent);
+  background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
   color: #fff;
   border: none;
   border-radius: 999px;
-  padding: 10px 22px;
-  font-weight: 700;
+  padding: 11px 24px;
+  font-weight: 800;
   font-size: 14px;
   cursor: pointer;
+  box-shadow: 0 6px 16px rgba(47, 107, 255, 0.4);
   transition: filter 0.12s, transform 0.12s;
 }
 .primary-btn:active,
@@ -349,7 +436,7 @@ body {
 }
 .primary-btn:hover,
 .retry-btn:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
 }
 
 /* ---------- Skeleton ---------- */
@@ -359,33 +446,39 @@ body {
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.09) 37%,
-    rgba(255, 255, 255, 0.04) 63%
+    rgba(47, 107, 255, 0.06) 25%,
+    rgba(47, 107, 255, 0.14) 37%,
+    rgba(47, 107, 255, 0.06) 63%
   );
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: 10px;
 }
+.skeleton-headlines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .skeleton-logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  margin-top: 8px;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
 }
 .skeleton-line {
-  height: 18px;
+  height: 16px;
   width: 60%;
-  margin-top: 18px;
 }
 .skeleton-line--wide {
-  width: 80%;
-  height: 24px;
+  width: 85%;
+  height: 20px;
+}
+.skeleton-chart {
+  flex: 1;
+  min-height: 150px;
 }
 .skeleton-stats {
-  margin-top: auto;
-  width: 100%;
-  height: 70px;
+  height: 56px;
 }
 @keyframes shimmer {
   0% {
@@ -413,19 +506,20 @@ body {
   gap: 12px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 10px 14px;
+  box-shadow: var(--shadow-sm);
 }
 .lb-rank {
-  font-weight: 800;
-  color: var(--text-dim);
+  font-weight: 900;
+  color: var(--brand);
   text-align: center;
   font-size: 15px;
 }
 .lb-logo {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: 14px;
   object-fit: cover;
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -435,13 +529,13 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--text-faint);
-  font-weight: 800;
+  font-weight: 900;
 }
 .lb-meta {
   min-width: 0;
 }
 .lb-name {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
@@ -449,15 +543,15 @@ body {
 }
 .lb-symbol {
   font-size: 12px;
-  color: var(--text-dim);
-  font-weight: 600;
+  color: var(--brand);
+  font-weight: 700;
 }
 .lb-stats {
   text-align: right;
   min-width: 84px;
 }
 .lb-net {
-  font-weight: 800;
+  font-weight: 900;
   font-size: 16px;
 }
 .lb-net.pos {
@@ -482,7 +576,7 @@ body {
 .lb-total {
   font-size: 11px;
   color: var(--text-faint);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .lb-empty,
@@ -494,10 +588,12 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  font-weight: 700;
 }
 .lb-error-detail {
   font-size: 12px;
   color: var(--text-faint);
+  font-weight: 600;
   max-width: 280px;
 }
 
@@ -507,33 +603,34 @@ body {
   left: 50%;
   bottom: calc(20px + env(safe-area-inset-bottom));
   transform: translateX(-50%) translateY(20px);
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  color: var(--text);
+  background: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
   padding: 12px 18px;
   border-radius: 12px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   max-width: 90vw;
   text-align: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s, transform 0.25s;
   z-index: 50;
+  box-shadow: var(--shadow);
 }
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 .toast--warn {
-  border-color: #6b5a1a;
+  background: #8a6d1b;
 }
 .toast--error {
-  border-color: var(--bear);
+  background: var(--bear);
 }
 
 @media (min-width: 520px) {
   .deck {
-    max-width: 380px;
+    max-width: 400px;
   }
 }

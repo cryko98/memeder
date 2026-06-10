@@ -10,11 +10,17 @@ export type Direction = "bullish" | "bearish";
  */
 export interface Token {
   tokenAddress: string;
+  /** The most-liquid pair address — used to embed the DexScreener chart. */
+  pairAddress: string | null;
+  /** Chain id (always "solana" here) — needed to build the chart/page URLs. */
+  chainId: string;
+  /** Direct link to this token's DexScreener page (opens in a new tab). */
+  dexUrl: string;
   name: string;
   symbol: string;
   imageUrl: string;
   priceUsd: number | null;
-  marketCap: number; // marketCap, or fdv fallback
+  marketCap: number; // marketCap, or fdv fallback (min 30k, enforced server-side)
   volume24h: number | null;
   /**
    * DexScreener has no holder count, so we surface liquidity (USD) here and

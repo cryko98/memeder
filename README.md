@@ -1,12 +1,10 @@
-# SwipeFi — Memecoin Tinder 🔥
+# memeder — Memecoin Tinder 🐸
 
 Swipe-based voting on real Solana memecoins. Swipe **right if you're bullish**,
 **left if you're bearish**. Votes are stored in **Supabase**, so the leaderboard
 is **global** across every visitor.
 
-> "SwipeFi" is a placeholder name — rebrand freely.
-
-- **Tech:** Vite + vanilla TypeScript (no React), plain CSS, dark theme, mobile-first
+- **Tech:** Vite + vanilla TypeScript (no React), plain CSS, blue & white theme, mobile-first
 - **Data:** [DexScreener](https://docs.dexscreener.com/) (free, no API key), proxied server-side
 - **Backend:** Supabase (`votes` table + atomic `cast_vote` RPC + RLS)
 - **Deploy:** Vercel (static frontend + one serverless proxy function)
@@ -18,11 +16,13 @@ is **global** across every visitor.
 A single-page app with two screens:
 
 1. **Swipe deck** — one memecoin card at a time (next card peeks behind). Each
-   card shows logo, name, `$TICKER`, market cap, 24h volume, liquidity, and 24h
-   price change (green up / red down). Drag with mouse or finger: the card tilts
-   and a **BULLISH** / **BEARISH** stamp fades in. Release past the threshold and
-   the card flies off and the vote is recorded; otherwise it snaps back. There
-   are also ✕ / ✓ fallback buttons.
+   card shows logo, name, `$TICKER`, the **live DexScreener chart**, market cap,
+   24h volume, liquidity, 24h price change (green up / red down), and a **View on
+   DexScreener ↗** button that opens the token's page in a new tab. Drag with
+   mouse or finger: the card tilts and a **BULLISH 🚀** / **BEARISH 💀** stamp
+   fades in. Release past the threshold and the card flies off and the vote is
+   recorded; otherwise it snaps back. There are also ✕ / ✓ fallback buttons.
+   Tokens below a **30k market cap** are filtered out server-side.
 2. **Leaderboard** — reads live from Supabase, ranked by **net score**
    (bullish − bearish). Each row shows rank, logo, name, `$TICKER`, net score, a
    bullish/bearish ratio bar, and total votes. Auto-refreshes every 15s (and on
@@ -108,8 +108,10 @@ calls our own [`api/tokens.ts`](api/tokens.ts) on Vercel, which:
    `chainId === "solana"`,
 2. batches those addresses (max 30 per call) into
    `GET /latest/dex/tokens/{addresses}`,
-3. picks the most-liquid pair per token and maps it to a clean card shape,
-4. **skips** tokens missing a logo or market cap so the UI never crashes,
+3. picks the most-liquid pair per token (its `pairAddress` powers the embedded
+   chart and the "View on DexScreener" link) and maps it to a clean card shape,
+4. **skips** tokens missing a logo or market cap, and tokens under a **30k
+   market cap** (`MIN_MARKET_CAP`), so the UI never shows dust or crashes,
 5. caches the response for ~60s (in-memory + `Cache-Control` for the CDN) to
    respect DexScreener's rate limits (300 req/min on `/latest/dex`).
 
@@ -146,7 +148,7 @@ could later supply real holder counts.
 index.html              # app shell
 src/
   main.ts               # wiring: tabs, deck, voting, toasts
-  style.css             # dark, mobile-first styles
+  style.css             # blue & white, mobile-first styles
   api.ts                # client fetch wrapper -> /api/tokens
   supabase.ts           # Supabase client + castVote + fetchLeaderboard + realtime
   swipe.ts              # pointer-based drag/swipe logic

@@ -96,17 +96,24 @@ function renderTopCards() {
     return;
   }
 
-  // Peeking next card (behind).
+  // Peeking next card (behind) — no chart, keeps it light.
   if (deck[1]) {
-    deckEl.appendChild(cardEl(deck[1], true));
+    deckEl.appendChild(cardEl(deck[1], { behind: true, withChart: false }));
   }
 
-  // Active front card.
-  const front = cardEl(deck[0], false);
+  // Active front card — with the live DexScreener chart embedded.
+  const front = cardEl(deck[0], { behind: false, withChart: true });
   deckEl.appendChild(front);
 
   const stampBull = front.querySelector<HTMLDivElement>(".stamp-bull")!;
   const stampBear = front.querySelector<HTMLDivElement>(".stamp-bear")!;
+
+  // The "View on DexScreener" link sits on the card; stop pointerdown from
+  // bubbling so tapping it opens the link instead of starting a drag.
+  front.querySelector<HTMLAnchorElement>(".card-dexlink")?.addEventListener(
+    "pointerdown",
+    (e) => e.stopPropagation()
+  );
 
   activeSwiper = makeSwipeable(front, {
     onDragDirection(dir, magnitude) {
@@ -127,34 +134,48 @@ function renderTopCards() {
   });
 }
 
-function cardEl(token: Token, behind: boolean): HTMLDivElement {
+function cardEl(token: Token, opts: { behind: boolean; withChart: boolean }): HTMLDivElement {
   const el = document.createElement("div");
-  el.className = "card" + (behind ? " card--behind" : "");
+  el.className = "card" + (opts.behind ? " card--behind" : "");
   const change = token.priceChange24h;
   const changeClass = change === null ? "" : change >= 0 ? "up" : "down";
 
+  const chartSrc = chartUrl(token);
+  const chartHtml =
+    opts.withChart && chartSrc
+      ? `<iframe class="card-chart" src="${escapeAttr(chartSrc)}" title="DexScreener chart"
+                 loading="lazy" referrerpolicy="no-referrer"></iframe>`
+      : `<div class="card-chart card-chart--placeholder">📈</div>`;
+
   el.innerHTML = `
-    <div class="stamp stamp-bull">BULLISH</div>
-    <div class="stamp stamp-bear">BEARISH</div>
-    <div class="card-logo-wrap">
-      <img class="card-logo" src="${escapeAttr(token.imageUrl)}" alt="${escapeAttr(token.name)}"
-           draggable="false" onerror="this.style.visibility='hidden'">
+    <div class="stamp stamp-bull">BULLISH 🚀</div>
+    <div class="stamp stamp-bear">BEARISH 💀</div>
+    <div class="card-head">
+      <div class="card-logo-wrap">
+        <img class="card-logo" src="${escapeAttr(token.imageUrl)}" alt="${escapeAttr(token.name)}"
+             draggable="false" onerror="this.style.visibility='hidden'">
+      </div>
+      <div class="card-title">
+        <span class="card-name">${escapeHtml(token.name)}</span>
+        <span class="card-ticker">$${escapeHtml(token.symbol.toUpperCase())}</span>
+      </div>
+      <div class="card-pricewrap">
+        <span class="card-price">${formatPrice(token.priceUsd)}</span>
+        <span class="card-change ${changeClass}">${formatPct(change)}</span>
+      </div>
     </div>
-    <div class="card-title">
-      <span class="card-name">${escapeHtml(token.name)}</span>
-      <span class="card-ticker">$${escapeHtml(token.symbol.toUpperCase())}</span>
+
+    <div class="card-chart-wrap">
+      ${chartHtml}
     </div>
-    <div class="card-price">
-      ${formatPrice(token.priceUsd)}
-      <span class="card-change ${changeClass}">${formatPct(change)}</span>
-    </div>
+
     <div class="card-stats">
       <div class="stat">
         <span class="stat-label">Market Cap</span>
         <span class="stat-value">${formatUsd(token.marketCap)}</span>
       </div>
       <div class="stat">
-        <span class="stat-label">24h Volume</span>
+        <span class="stat-label">24h Vol</span>
         <span class="stat-value">${formatUsd(token.volume24h)}</span>
       </div>
       <div class="stat">
@@ -163,8 +184,34 @@ function cardEl(token: Token, behind: boolean): HTMLDivElement {
         <span class="stat-value">${formatUsd(token.liquidityUsd)}</span>
       </div>
     </div>
+
+    <a class="card-dexlink" href="${escapeAttr(token.dexUrl)}" target="_blank" rel="noopener noreferrer">
+      View on DexScreener ↗
+    </a>
   `;
   return el;
+}
+
+/**
+ * Build the DexScreener embeddable chart URL for a token's pair.
+ * Returns null when we have no pair address (then the card shows a placeholder).
+ */
+function chartUrl(token: Token): string | null {
+  if (!token.pairAddress) return null;
+  const params = [
+    "embed=1",
+    "loadChartSettings=0",
+    "trades=0",
+    "tabs=0",
+    "info=0",
+    "chartLeftToolbar=0",
+    "chartTheme=dark",
+    "theme=dark",
+    "chartStyle=1", // candles
+    "chartType=usd",
+    "interval=15",
+  ].join("&");
+  return `https://dexscreener.com/${token.chainId}/${token.pairAddress}?${params}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -198,9 +245,14 @@ btnBear.addEventListener("click", () => activeSwiper?.programmatic("bearish"));
 function renderSkeleton() {
   deckEl.innerHTML = `
     <div class="card card--skeleton">
-      <div class="skeleton skeleton-logo"></div>
-      <div class="skeleton skeleton-line skeleton-line--wide"></div>
-      <div class="skeleton skeleton-line"></div>
+      <div class="card-head">
+        <div class="skeleton skeleton-logo"></div>
+        <div class="skeleton-headlines">
+          <div class="skeleton skeleton-line skeleton-line--wide"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+      </div>
+      <div class="skeleton skeleton-chart"></div>
       <div class="skeleton skeleton-stats"></div>
     </div>
   `;
@@ -269,8 +321,8 @@ function template(): string {
   return `
     <header class="app-header">
       <div class="brand">
-        <span class="brand-mark">🔥</span>
-        <span class="brand-name">SwipeFi</span>
+        <span class="brand-mark">🐸</span>
+        <span class="brand-name">memeder</span>
       </div>
       <nav class="tabs">
         <button id="tab-swipe" class="tab active">Swipe</button>
