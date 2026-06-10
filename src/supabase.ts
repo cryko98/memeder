@@ -7,12 +7,29 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Direction, LeaderboardRow, RankedRow, Token } from "./types";
 
-// Trim whitespace and any trailing slash(es). A trailing "/" in the env var
-// produces a double slash in request URLs (".../supabase.co//rest/v1/rpc/...")
-// and Supabase rejects it with "Invalid path specified in request URL".
+// Normalize the URL defensively. A trailing "/" in the env var produces a
+// double slash in request URLs (".../supabase.co//rest/v1/rpc/...") and Supabase
+// rejects it with "Invalid path specified in request URL". We also strip an
+// accidentally-pasted "/rest/v1" suffix.
+function normalizeUrl(u: string | undefined): string | undefined {
+  if (!u) return u;
+  return u
+    .trim()
+    .replace(/\/+$/, "") // trailing slashes
+    .replace(/\/rest\/v1$/, ""); // accidental REST suffix
+}
+
 const rawUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const url = rawUrl?.trim().replace(/\/+$/, "");
+const url = normalizeUrl(rawUrl);
 const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim();
+
+// One-time diagnostic: log the exact URL the client will use (NOT the key) so a
+// misconfigured env var is obvious in the browser console.
+console.info(
+  "[memeder] Supabase URL:",
+  url ?? "(missing)",
+  rawUrl && rawUrl !== url ? `(normalized from "${rawUrl}")` : ""
+);
 
 /**
  * Lazily created client. If env vars are missing we keep the app usable
