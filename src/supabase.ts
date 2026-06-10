@@ -7,8 +7,12 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Direction, LeaderboardRow, RankedRow, Token } from "./types";
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+// Trim whitespace and any trailing slash(es). A trailing "/" in the env var
+// produces a double slash in request URLs (".../supabase.co//rest/v1/rpc/...")
+// and Supabase rejects it with "Invalid path specified in request URL".
+const rawUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const url = rawUrl?.trim().replace(/\/+$/, "");
+const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim();
 
 /**
  * Lazily created client. If env vars are missing we keep the app usable
