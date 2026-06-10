@@ -5,8 +5,10 @@
 // cleaned, defensively-filtered deck of Solana memecoin cards.
 //
 // Data flow:
-//   1. GET /token-boosts/top/v1            -> trending/boosted tokens (all chains)
-//   2. filter chainId === "solana"         -> collect tokenAddress values
+//   1. Pull token addresses from several free DexScreener discovery endpoints
+//      (top boosts + latest boosts + latest token profiles), filtered to Solana,
+//      so the deck is as large as possible.
+//   2. dedupe addresses                    -> collect tokenAddress values
 //   3. GET /latest/dex/tokens/{addrs}      -> pair data (batched, max 30/call)
 //   4. pick the most-liquid pair per token -> map to our Token shape
 //
@@ -15,9 +17,18 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 // ----- DexScreener endpoints -----
-const BOOSTS_URL = "https://api.dexscreener.com/token-boosts/top/v1";
+// Several discovery endpoints feed the deck; merging them gives many more coins
+// than the top-boosts list alone. All are free and need no API key.
+const SOURCE_URLS = [
+  "https://api.dexscreener.com/token-boosts/top/v1",
+  "https://api.dexscreener.com/token-boosts/latest/v1",
+  "https://api.dexscreener.com/token-profiles/latest/v1",
+];
 const TOKENS_URL = "https://api.dexscreener.com/latest/dex/tokens/";
 const MAX_ADDR_PER_CALL = 30;
+// Upper bound on how many addresses we resolve per refresh. Keeps us comfortably
+// under DexScreener's 300 req/min limit (this many / 30 per batch = a few calls).
+const MAX_ADDRESSES = 180;
 const CACHE_SECONDS = 60;
 // Don't show micro-cap dust: skip any token whose market cap is below this.
 const MIN_MARKET_CAP = 30_000;
@@ -102,15 +113,27 @@ function sendOk(res: VercelResponse, tokens: OutToken[], cachedAt: number) {
 }
 
 async function buildDeck(): Promise<OutToken[]> {
-  // 1. Trending/boosted tokens, filtered to Solana.
-  const boosts = (await fetchJson(BOOSTS_URL)) as BoostItem[];
+  // 1. Pull Solana token addresses from every discovery endpoint in parallel and
+  //    merge them into one deduped list. A failing source just contributes none.
+  const sourceResults = await Promise.all(
+    SOURCE_URLS.map(async (u) => {
+      try {
+        const items = (await fetchJson(u)) as BoostItem[];
+        return Array.isArray(items) ? items : [];
+      } catch {
+        return [] as BoostItem[];
+      }
+    })
+  );
+
   const addresses = Array.from(
     new Set(
-      (Array.isArray(boosts) ? boosts : [])
+      sourceResults
+        .flat()
         .filter((b) => b.chainId === "solana" && typeof b.tokenAddress === "string")
         .map((b) => b.tokenAddress as string)
     )
-  );
+  ).slice(0, MAX_ADDRESSES);
 
   if (addresses.length === 0) return [];
 
